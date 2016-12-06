@@ -12,6 +12,7 @@ struct Step {
     dist : isize
 }
 
+// Convert a string into a vector of steps
 fn parse(text: &str) -> Result<Vec<Step>, String> {
     let mut vec: Vec<Step> = Vec::new();
     for entry in text.split(',') {
@@ -43,6 +44,7 @@ struct Coordinate {
 
 enum AbsDir { North, East, South, West }
 
+// Determine the new absolute direction based on the relative update
 fn turn(a: AbsDir, t: Direction) -> AbsDir {
     match t {
         Direction::Left => match a {
@@ -60,7 +62,8 @@ fn turn(a: AbsDir, t: Direction) -> AbsDir {
     }
 }
 
-// assume the following releationships
+// calculate the final destination coordinates
+// assume the following coordinate system mapping
 // -x w
 // x  e
 // -y s
@@ -80,6 +83,7 @@ fn calc_dest(steps: &Vec<Step>) -> Coordinate {
     location
 }
 
+// Same as calc_dest but tracks the path and checks for the first location visited twice
 fn calc_dest2(steps: &Vec<Step>) -> Coordinate {
     let mut facing = AbsDir::North;
     let mut location = Coordinate {x:0,y:0};
@@ -96,7 +100,10 @@ fn calc_dest2(steps: &Vec<Step>) -> Coordinate {
                 AbsDir::West  => location.x -= 1,
             }
             // leave early if we already visited this spot
-            if let Some(_) = path.iter().position(|c| c.x == location.x && c.y == location.y ) {return location};
+            // not sure why I need to borrow for the comparison because Coordinates are Copy.
+            if let Some(_) = path.iter().position(
+                |c| c == &location ) {return location};
+            // otherwise we save it and keep going
             path.push(location);
         }
     }
@@ -104,7 +111,7 @@ fn calc_dest2(steps: &Vec<Step>) -> Coordinate {
 }
 
 fn main() {
-    // get the file contents
+    // get the file contents as an Option
     let option = match env::args().count() {
         // correct number of args? try to read the file
         2 => {
@@ -113,8 +120,13 @@ fn main() {
                 // create string with file contents
                 Ok(mut x) => {
                     let mut s = String::new();
-                    if let Ok(_) = x.read_to_string(&mut s) { Option::Some(s) }
-                    else { println!("Error reading file '{}'",&fname); Option::None }
+                    if let Ok(_) = x.read_to_string(&mut s) {
+                        Option::Some(s)
+                    }
+                    else {
+                        println!("Error reading file '{}'",&fname);
+                        Option::None
+                    }
                 }
                 Err(e) => {
                     println!("Couldn't open file '{}': {}",&fname,e);
@@ -130,12 +142,15 @@ fn main() {
         }
     };
 
+    // if there is a string, parse it
     if let Some(s) = option {
         let v = parse(&s).unwrap();
         let dest = calc_dest(&v);
-        println!("Destination: {:?}. Distance: {}",dest, dest.x.abs()+dest.y.abs());
+        println!("Destination (part1): {:?}. Distance: {}",
+                 dest, dest.x.abs()+dest.y.abs());
         let pt2_dest = calc_dest2(&v);
-        println!("Destination: {:?}. Distance: {}",pt2_dest, pt2_dest.x.abs()+pt2_dest.y.abs());
+        println!("Destination (part2): {:?}. Distance: {}",
+                 pt2_dest, pt2_dest.x.abs()+pt2_dest.y.abs());
     } else {
         process::exit(1);
     }
