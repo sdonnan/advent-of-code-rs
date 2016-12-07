@@ -36,13 +36,20 @@ struct Coordinate {
 }
 
 // limit a number to the keypad coordinates
-fn key_lim(input: i8) -> i8 {
+fn limit<T: Ord>(input: T, min: T, max: T) -> T {
     match () {
-        _ if input < 0 => 0,
-        _ if input > 2 => 2,
+        _ if input < min => min,
+        _ if input > max => max,
         _ => input
     }
 }
+
+const PT2_KEYS : [Option<i8>; 25] =
+    [ None,    None,     Some(1),  None,     None,
+      None,    Some(2),  Some(3),  Some(4),  None,
+      Some(5), Some(6),  Some(7),  Some(8),  Some(9),
+      None,    Some(10), Some(11), Some(12), None,
+      None,    None,     Some(13), None,     None ];
 
 impl Coordinate {
 
@@ -58,28 +65,60 @@ impl Coordinate {
 
     // set the coordinate based on the keypad. see mapping in as_key
     fn from_key(&mut self, key: i8) {
-        self.x = key_lim(key % 3 - 1);
-        self.y = key_lim(key / 3);
+        self.x = limit(key % 3 - 1,0,2);
+        self.y = limit(key / 3    ,0,2);
+    }
+
+    // Keypad maps to coordinates like so
+    //    0 1 2 3 4
+    //    --------- x
+    // 0 |    1
+    // 1 |  2 3 4
+    // 2 |5 6 7 8 9
+    // 3 |  A B C
+    // 4 |    D
+    //   y
+    // Return the integer key represented by the coordinate (A-D are hex)
+    fn as_key_pt2(&self) -> Option<i8> { PT2_KEYS[(self.x+5*self.y) as usize] }
+
+    // set the coordinate based on the keypad. see mapping in PT2_KEYS
+    fn from_key_pt2(&mut self, key: i8) {
+        let lin_pos = PT2_KEYS.iter().enumerate().find(
+            |&x| match x.1 {
+                &Some(y) => key == y,
+                _       => false
+            }
+        ).unwrap().0;
+        self.x = (lin_pos % 5) as i8;
+        self.y = (lin_pos / 5) as i8;
     }
 
     // go to a coordinate limited to the keypad
     fn go(&mut self, dir: &Direction) {
         match dir {
-            &Direction::Left  => {self.x = key_lim(self.x-1)},
-            &Direction::Right => {self.x = key_lim(self.x+1)},
-            &Direction::Up    => {self.y = key_lim(self.y-1)},
-            &Direction::Down  => {self.y = key_lim(self.y+1)},
+            &Direction::Left  => {self.x = limit(self.x-1,0,2)},
+            &Direction::Right => {self.x = limit(self.x+1,0,2)},
+            &Direction::Up    => {self.y = limit(self.y-1,0,2)},
+            &Direction::Down  => {self.y = limit(self.y+1,0,2)},
         }
     }
-}
 
-// calculate the final destination coordinates
-fn calc_dest(start: &Coordinate, steps: &Vec<Direction>) -> Coordinate {
-    let mut location : Coordinate = start.clone();
-    for step in steps {
-        location.go(step);
-    };
-    location
+    // go to a coordinate limited to the part 2 keypad
+    fn go_pt2(&mut self, dir: &Direction) {
+        let new_coord = match dir {
+            &Direction::Left  => Coordinate{x:limit(self.x-1,0,4), y:self.y},
+            &Direction::Right => Coordinate{x:limit(self.x+1,0,4), y:self.y},
+            &Direction::Up    => Coordinate{y:limit(self.y-1,0,4), x:self.x},
+            &Direction::Down  => Coordinate{y:limit(self.y+1,0,4), x:self.x},
+        };
+        // if its a valid key then update coordinate
+        if let Some(_) = new_coord.as_key_pt2() {
+            *self = new_coord;
+            //self.x = new_coord.x;
+            //self.y = new_coord.y;
+        }
+    }
+
 }
 
 fn main() {
@@ -120,8 +159,16 @@ fn main() {
         let mut dest = Coordinate {x:0,y:0};
         dest.from_key(5); // instructions say we start at 5
         let code : Vec<i8> = key_vecs.iter().map(|v| {
-            dest = calc_dest(&dest, &v);
+            for step in v { dest.go(step) };
             dest.as_key()
+        }).collect();
+        println!("{:?}", code);
+
+        let mut dest2 = Coordinate {x:0,y:0};
+        dest2.from_key_pt2(5); // instructions say we start at 5
+        let code : Vec<String> = key_vecs.iter().map(|v| {
+            for step in v { dest2.go_pt2(step) };
+            format!("{:x}",dest2.as_key_pt2().unwrap()) // make it hex
         }).collect();
         println!("{:?}", code);
     } else {

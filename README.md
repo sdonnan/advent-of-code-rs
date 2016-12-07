@@ -7,3 +7,18 @@ free to give me feedback.
 
 **Spoiler Alert** Solutions Inside. Obviously.
 
+Challenges Complete
+-------------------
+
+Day | Part 1 | Part 2 | Comments
+----|--------|--------|---------
+1   |   ✓    |   ✓    |
+2   |   ✓    |   ✓    | Feeling like the code is a bit verbose
+3   |        |        |
+4   |        |        |
+5   |        |        |
+6   |        |        |
+
+
+
+
