@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::process;
 
+#[derive(Debug)]
 struct Triangle {
     a : u32,
     b : u32,
@@ -20,10 +21,16 @@ fn parse(text: &str) -> Result<Vec<Triangle>, String> {
                 Ok(n)  => {nums[index] = n;},
                 Err(_) => {return Result::Err(format!("Bad input at line {}",line));}
             }
-            vec.push(Triangle{a:nums[0],b:nums[1],c:nums[2]});
         }
+        vec.push(Triangle{a:nums[0],b:nums[1],c:nums[2]});
     }
     Result::Ok(vec)
+}
+
+fn test_tri(t: &Triangle) -> bool {
+    t.a + t.b > t.c &&
+    t.b + t.c > t.a &&
+    t.c + t.a > t.b
 }
 
 fn main() {
@@ -63,13 +70,21 @@ fn main() {
         let tris = parse(&s).unwrap();
         let mut count : usize = 0;
         for t in &tris {
-           if t.a + t.b > t.c &&
-              t.b + t.c > t.a &&
-              t.c + t.a > t.b {
-                  count += 1;
-              }
+            if test_tri(t) {count += 1};
         }
-        println!("{} of {} triangles valid",count,tris.len());
+        println!("Pt1 {} of {} triangles valid",count,tris.len());
+        let mut count = 0;
+        let mut titer = tris.iter();
+        for _ in 0..tris.len()/3 {
+            let i = titer.next().unwrap();
+            let j = titer.next().unwrap();
+            let k = titer.next().unwrap();
+
+            if test_tri(&Triangle {a:i.a , b:j.a , c:k.a}) {count += 1};
+            if test_tri(&Triangle {a:i.b , b:j.b , c:k.b}) {count += 1};
+            if test_tri(&Triangle {a:i.c , b:j.c , c:k.c}) {count += 1};
+        }
+        println!("Pt2 {} of {} triangles valid",count,tris.len());
     } else {
         process::exit(1);
     }

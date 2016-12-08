@@ -14,7 +14,7 @@ Day | Part 1 | Part 2 | Comments
 ----|--------|--------|---------
 1   |   ✓    |   ✓    |
 2   |   ✓    |   ✓    | Feeling like the code is a bit verbose
-3   |   ✓    |        |
+3   |   ✓    |   ✓    |
 4   |        |        |
 5   |        |        |
 6   |        |        |
