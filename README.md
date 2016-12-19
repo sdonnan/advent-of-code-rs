@@ -15,7 +15,7 @@ Day | Part 1 | Part 2 | Comments
 1   |   ✓    |   ✓    |
 2   |   ✓    |   ✓    | Feeling like the code is a bit verbose
 3   |   ✓    |   ✓    |
-4   |        |        |
+4   |   ✓    |   ✓    | Didn't spend time cleaning anything up
 5   |        |        |
 6   |        |        |
 
