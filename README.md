@@ -16,7 +16,7 @@ Day | Part 1 | Part 2 | Comments
 2   |   ✓    |   ✓    | Feeling like the code is a bit verbose
 3   |   ✓    |   ✓    |
 4   |   ✓    |   ✓    | Didn't spend time cleaning anything up
-5   |        |        |
+5   |   ✓    |   ✓    | No animation, no threads. Should add these
 6   |        |        |
 
 
